@@ -21,6 +21,7 @@ BATCH_SIZE = 64
 LEARNING_RATE = 1e-4
 REPLAY_SIZE = 100000
 REPLAY_INITIAL = 10000
+MAX_FRAME = 5e6
 
 TEST_ITERS = 1000
 
@@ -74,7 +75,7 @@ if __name__ == "__main__":
     best_reward = None
     with ptan.common.utils.RewardTracker(writer) as tracker:
         with ptan.common.utils.TBMeanTracker(writer, batch_size=10) as tb_tracker:
-            while True:
+            while frame_idx < MAX_FRAME:
                 frame_idx += 1
                 buffer.populate(1)
                 rewards_steps = exp_source.pop_rewards_steps()
