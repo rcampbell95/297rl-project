@@ -17,7 +17,26 @@
 python main.py -n=<run name>
 ```
 
-### Setting up Windows environment:
+#### For example:
+
+```sh
+python main.py -n=firstrun
+```
+
+## To Run DDPG Training with a DQN Extension:
+
+```sh
+python main.py -n=<run name> --extension=<extension name>
+```
+
+Available extensions: double, nstep, noisy
+
+### For example:
+```sh
+python main.py -n=<run name> --extension=nstep
+```
+_________________
+## Setting up Windows environment:
 
 1. install Anaconda from the following link https://www.anaconda.com/downloads
 
