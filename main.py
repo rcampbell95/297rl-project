@@ -56,6 +56,7 @@ if __name__ == "__main__":
 
     env = gym.make(ENV_ID)
     test_env = gym.make(ENV_ID)
+    unroll_step = 2 if args.extension == "n-step" else 1
 
     act_net = model.DDPGActor(env.observation_space.shape[0], env.action_space.shape[0]).to(device)
     crt_net = model.DDPGCritic(env.observation_space.shape[0], env.action_space.shape[0]).to(device)
@@ -64,9 +65,10 @@ if __name__ == "__main__":
     tgt_act_net = ptan.agent.TargetNet(act_net)
     tgt_crt_net = ptan.agent.TargetNet(crt_net)
 
+   
     writer = SummaryWriter(comment="-ddpg_" + args.name)
     agent = model.AgentDDPG(act_net, device=device)
-    exp_source = ptan.experience.ExperienceSourceFirstLast(env, agent, gamma=GAMMA, steps_count=1)
+    exp_source = ptan.experience.ExperienceSourceFirstLast(env, agent, gamma=GAMMA, steps_count=unroll_step)
     buffer = ptan.experience.ExperienceReplayBuffer(exp_source, buffer_size=REPLAY_SIZE)
     act_opt = optim.Adam(act_net.parameters(), lr=LEARNING_RATE)
     crt_opt = optim.Adam(crt_net.parameters(), lr=LEARNING_RATE)
@@ -108,7 +110,7 @@ if __name__ == "__main__":
 
                 q_last_v = tgt_crt_net.target_model(last_states_v, last_act_v)
                 q_last_v[dones_mask] = 0.0
-                q_ref_v = rewards_v.unsqueeze(dim=-1) + q_last_v * GAMMA
+                q_ref_v = rewards_v.unsqueeze(dim=-1) + q_last_v * (GAMMA ** unroll_step)
                 critic_loss_v = F.mse_loss(q_v, q_ref_v.detach())
                 critic_loss_v.backward()
                 crt_opt.step()
