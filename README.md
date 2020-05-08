@@ -23,7 +23,7 @@ python main.py -n=<run name>
 python main.py -n=firstrun
 ```
 
-## To Run DDPG Training with a DQN Extension:
+### To Run DDPG Training with a DQN Extension:
 
 ```sh
 python main.py -n=<run name> --extension=<extension name>
@@ -31,7 +31,7 @@ python main.py -n=<run name> --extension=<extension name>
 
 Available extensions: double, nstep, noisy
 
-### For example:
+#### For example:
 ```sh
 python main.py -n=<run name> --extension=nstep
 ```
