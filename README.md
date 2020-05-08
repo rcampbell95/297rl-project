@@ -1,5 +1,11 @@
 # 298rl-project
 
+To Run DDPG Training:
+
+```sh
+python main.py -n=<run name>
+```
+
 Setting up Windows environment:
 
 1. install Anaconda from the following link https://www.anaconda.com/downloads
