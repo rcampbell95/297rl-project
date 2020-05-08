@@ -1,12 +1,23 @@
-# 297rl-project
+# Teaching Minitaur How to Walk using DDPG with Rainbow Extensions
 
-To Run DDPG Training:
+### Directory Layout
+
+    .
+    ├── main.py                 # Driver script for training using DDPG
+    ├── runs                    # Latest results for each DQN Extension / Modification
+    ├── assets                  # Images for results and other supporting material
+    ├── saves                   # Latest models for each DQN Extension / Modification
+    ├── lib                     # Libraries / Wrapper used by main script
+    └── README.md
+
+
+### To Run DDPG Training:
 
 ```sh
 python main.py -n=<run name>
 ```
 
-Setting up Windows environment:
+### Setting up Windows environment:
 
 1. install Anaconda from the following link https://www.anaconda.com/downloads
 
