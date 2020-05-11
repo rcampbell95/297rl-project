@@ -26,14 +26,14 @@ python main.py -n=firstrun
 ### To Run DDPG Training with a DQN Extension:
 
 ```sh
-python main.py -n=<run name> --extension=<extension name>
+python main.py -n=<run name> --double --step <unroll steps>
 ```
 
 Available extensions: double, nstep, noisy
 
 #### For example:
 ```sh
-python main.py -n=<run name> --extension=nstep
+python main.py -n=<run name> --double --step <unroll steps> --noisy
 ```
 _________________
 ## Setting up Windows environment:
