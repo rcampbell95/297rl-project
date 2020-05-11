@@ -47,9 +47,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action='store_true', help='Enable CUDA')
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
-    parser.add_argument("--double", required=False, default=False, help="Enable double dqn extension")
-    parser.add_argument("--step", required=False, default=1, help="Steps to unroll")
-    parser.add_argument("--noisy", required=False, default=False, help="Enable noisy network extension")
+    parser.add_argument("--double", required=False, action="store_true", help="Enable double dqn extension")
+    parser.add_argument("--step", required=False, help="Steps to unroll")
+    parser.add_argument("--noisy", required=False, action="store_true", help="Enable noisy network extension")
 
 
     args = parser.parse_args()
