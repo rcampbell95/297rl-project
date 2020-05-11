@@ -47,7 +47,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action='store_true', help='Enable CUDA')
     parser.add_argument("-n", "--name", required=True, help="Name of the run")
-    parser.add_argument("-e", "--extension", required=False, help="DQN Extension to use")
+    parser.add_argument("--double", required=False, default=False, help="Enable double dqn extension")
+    parser.add_argument("--step", required=False, default=1, help="Steps to unroll")
+    parser.add_argument("--noisy", required=False, default=False, help="Enable noisy network extension")
+
+
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
@@ -56,9 +60,9 @@ if __name__ == "__main__":
 
     env = gym.make(ENV_ID)
     test_env = gym.make(ENV_ID)
-    unroll_step = 2 if args.extension == "n-step" else 1
+    unroll_step = int(args.step) if args.step else 1
 
-    act_net = model.DDPGActor(env.observation_space.shape[0], env.action_space.shape[0]).to(device)
+    act_net = model.DDPGActor(env.observation_space.shape[0], env.action_space.shape[0], args.noisy).to(device)
     crt_net = model.DDPGCritic(env.observation_space.shape[0], env.action_space.shape[0]).to(device)
     print(act_net)
     print(crt_net)
@@ -73,10 +77,12 @@ if __name__ == "__main__":
     act_opt = optim.Adam(act_net.parameters(), lr=LEARNING_RATE)
     crt_opt = optim.Adam(crt_net.parameters(), lr=LEARNING_RATE)
 
-    if args.extension == "double":
-        print('using Double DQN extension')
-    else:
-        print('using NO DQN extension')
+    if args.double:
+        print("Using Double DQN extension")
+    if args.step:
+        print("Using N-Step DQN extension")
+    if args.noisy:
+        print("Using Noisy Networks extension")
 
     frame_idx = 0
     best_reward = None
@@ -101,7 +107,7 @@ if __name__ == "__main__":
                 crt_opt.zero_grad()
                 q_v = crt_net(states_v, actions_v)
 
-                if args.extension == "double":
+                if args.double:
                     # use online actor network
                     last_act_v = act_net(last_states_v)
                 else:

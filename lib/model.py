@@ -4,8 +4,34 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
+
+import math
 
 HID_SIZE = 128
+
+class NoisyLinear(nn.Linear):
+    def __init__(self, in_features, out_features, sigma_init=0.017, bias=True):
+        super(NoisyLinear, self).__init__(in_features, out_features, bias=bias)
+        self.sigma_weight = nn.Parameter(torch.Tensor(out_features, in_features).fill_(sigma_init))
+        self.register_buffer("epsilon_weight", torch.zeros(out_features, in_features))
+        if bias:
+            self.sigma_bias = nn.Parameter(torch.Tensor(out_features).fill_(sigma_init))
+            self.register_buffer("epsilon_bias", torch.zeros(out_features))
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        std = math.sqrt(3 / self.in_features)
+        nn.init.uniform(self.weight, -std, std)
+        nn.init.uniform(self.bias, -std, std)
+
+    def forward(self, input):
+        torch.randn(self.epsilon_weight.size(), out=self.epsilon_weight)
+        bias = self.bias
+        if bias is not None:
+            torch.randn(self.epsilon_bias.size(), out=self.epsilon_bias)
+            bias = bias + self.sigma_bias * Variable(self.epsilon_bias)
+        return F.linear(input, self.weight + self.sigma_weight * Variable(self.epsilon_weight), bias)
 
 
 class ModelA2C(nn.Module):
@@ -32,17 +58,27 @@ class ModelA2C(nn.Module):
 
 
 class DDPGActor(nn.Module):
-    def __init__(self, obs_size, act_size):
+    def __init__(self, obs_size, act_size, noisy):
         super(DDPGActor, self).__init__()
 
-        self.net = nn.Sequential(
-            nn.Linear(obs_size, 400),
-            nn.ReLU(),
-            nn.Linear(400, 300),
-            nn.ReLU(),
-            nn.Linear(300, act_size),
-            nn.Tanh()
-        )
+        if noisy:
+            self.net = nn.Sequential(
+                NoisyLinear(obs_size, 400),
+                nn.ReLU(),
+                NoisyLinear(400, 300),
+                nn.ReLU(),
+                NoisyLinear(300, act_size),
+                nn.Tanh()
+            )
+        else:
+            self.net = nn.Sequential(
+                nn.Linear(obs_size, 400),
+                nn.ReLU(),
+                nn.Linear(400, 300),
+                nn.ReLU(),
+                nn.Linear(300, act_size),
+                nn.Tanh()
+            )
 
     def forward(self, x):
         return self.net(x)
